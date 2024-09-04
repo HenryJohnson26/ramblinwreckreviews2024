@@ -70,17 +70,17 @@ export default function Admin_AddFaculty() {
     setInviteFormState({ ...inviteFormState, accessTag: event.target.id });
   };
 
-  var departments = getDepartment(null);
+  //var departments = getDepartment(null);
 
-  const [Data, setData] = useState([]);
-  useEffect(() => {
-    axios
-      .get(
-        "https://ca5skkscwb.execute-api.us-east-2.amazonaws.com/lambdaStage/getQuestion"
-      )
-      .then((res) => setData(JSON.parse(res.data.body)))
-      .catch((err) => console.log(err));
-  }, []);
+  // const [Data, setData] = useState([]);
+  // useEffect(() => {
+  //   axios
+  //     .get(
+  //       "https://ca5skkscwb.execute-api.us-east-2.amazonaws.com/lambdaStage/getQuestion"
+  //     )
+  //     .then((res) => setData(JSON.parse(res.data.body)))
+  //     .catch((err) => console.log(err));
+  // }, []);
 
     axios
       .post(
@@ -99,7 +99,7 @@ export default function Admin_AddFaculty() {
   }
   return (
     <div className="admin-manage-faculty-content-container">
-       {<MenuBar />} 
+       {/* {<MenuBar />}  */}
       {/* Draws the section that displays the 'Preview Questions by Category' Box */}
       <div className="admin-manage-faculty-background-admin">
         <div className="admin-manage-faculty-card-content">
