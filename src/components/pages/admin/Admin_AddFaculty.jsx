@@ -74,12 +74,11 @@ export default function Admin_AddFaculty() {
 
   // const [Data, setData] = useState([]);
   // useEffect(() => {
-  //   axios
-  //     .get(
-  //       "https://ca5skkscwb.execute-api.us-east-2.amazonaws.com/lambdaStage/getQuestion"
-  //     )
-  //     .then((res) => setData(JSON.parse(res.data.body)))
-  //     .catch((err) => console.log(err));
+    // axios
+    //   .get(
+    //     "https://ca5skkscwb.execute-api.us-east-2.amazonaws.com/lambdaStage/getQuestion")
+    //   .then((res) => console.log(JSON.parse(res.data.body)))
+    //   .catch((err) => console.log(err));
   // }, []);
 
     axios
