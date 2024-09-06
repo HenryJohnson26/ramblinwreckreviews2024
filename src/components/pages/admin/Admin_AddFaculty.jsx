@@ -20,7 +20,8 @@ export default function Admin_AddFaculty() {
   useEffect(() => {
     axios
     .get(
-      "https://tsqijk5fz2.execute-api.us-east-2.amazonaws.com/default/getAdmin",
+     // "https://tsqijk5fz2.execute-api.us-east-2.amazonaws.com/default/getAdmin",
+      "https://3l2g4sxaue.execute-api.us-east-2.amazonaws.com/prod/department",
         {
           params: {
             ftn: "getDept",
