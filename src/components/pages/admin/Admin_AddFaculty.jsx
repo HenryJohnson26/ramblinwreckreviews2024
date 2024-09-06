@@ -16,6 +16,30 @@ export default function Admin_AddFaculty() {
   //re-renders page without state change
   //const [forceRender, setRender] = useState(0);
 
+  const [departments, setData] = useState([]);
+  useEffect(() => {
+    axios
+    .get(
+      "https://tsqijk5fz2.execute-api.us-east-2.amazonaws.com/default/getAdmin",
+        {
+          params: {
+            ftn: "getDept",
+            params: "3"
+          },
+        }
+      )
+      .then(response => {
+        setData(JSON.parse(response.data.body));
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, []);
+  //   .then((res) => {} setData(res));//console.log(JSON.parse(res.data.body)))
+  //   .catch((err) => console.log(err));
+  // }, []);
+  
+
   //holds user input for the invitation form
   const [inviteFormState, setInviteFormState] = useState({
     first: "",
@@ -155,10 +179,10 @@ export default function Admin_AddFaculty() {
                       className="admin-manage-faculty-department-dropdown"
                       onChange={updateDepartment}
                     >
-                      <option value="CS">CS</option>
-                      <option value="Physics">Physics</option>
-                      <option value="Chem">Chem</option>
-                    
+                      <option key={0}>--Choose--</option>
+                      {departments.map(item  => (
+                        <option key={item.id}>{item.dept_name}</option>
+                      ))}
                     </select>
                   </span>
                    </div>

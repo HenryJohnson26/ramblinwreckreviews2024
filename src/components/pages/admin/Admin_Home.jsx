@@ -10,21 +10,21 @@ import axios from "axios";
 
 
 function Admin_Home() {
-const [Data, setData] = useState([]);
-useEffect(() => {
-  axios
-  .get(
-    "https://tsqijk5fz2.execute-api.us-east-2.amazonaws.com/default/getAdmin",
-      {
-        params: {
-          ftn: "getDept",
-          params: "3"
-        },
-      }
-    )
-  .then((res) =>  console.log(JSON.parse(res.data.body)))
-  .catch((err) => console.log(err));
-}, []);
+// const [Data, setData] = useState([]);
+// useEffect(() => {
+//   axios
+//   .get(
+//     "https://tsqijk5fz2.execute-api.us-east-2.amazonaws.com/default/getAdmin",
+//       {
+//         params: {
+//           ftn: "getDept",
+//           params: "3"
+//         },
+//       }
+//     )
+//   .then((res) =>  console.log(JSON.parse(res.data.body)))
+//   .catch((err) => console.log(err));
+// }, []);
 
 
   return (
