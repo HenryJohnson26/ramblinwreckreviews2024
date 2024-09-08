@@ -7,6 +7,7 @@ import MenuBar from '../../MenuBar';
 import AWS_Authenticator from '../../AWS_Authenticator';
 import AuthStatusEnum from "../../../types/AuthStatusEnum";
 
+import axios from "axios";
 
 function Admin_ManageFaculty() {
   //stores users under a selected department
@@ -18,6 +19,28 @@ function Admin_ManageFaculty() {
   useEffect(() => {
     console.log('Forced render', forceRender);
   },[forceRender])
+
+
+  // getting data from db for department selection dropdown
+  const [departments, setData] = useState([]);
+  useEffect(() => {
+    axios
+    .get(
+      "https://3l2g4sxaue.execute-api.us-east-2.amazonaws.com/prod/department",
+        {
+          params: {
+            ftn: "getDept",
+            params: "3"
+          },
+        }
+      )
+      .then(response => {
+        setData(JSON.parse(response.data.body));
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, []);
 
 
   //holds user input for the invitation form
@@ -44,7 +67,7 @@ function Admin_ManageFaculty() {
   
 
   //load in all the departments using API loader call through React. This is set up to be linked in index.js
-  var departments = useLoaderData();
+  //var departments = useLoaderData();
 
   //fired when invite faculty form is submitted
   const handleInviteFormSubmit = async (event) => {
@@ -63,22 +86,40 @@ function Admin_ManageFaculty() {
     }
 
     //get the departmentID to be added to
-    let deptID = await fetchDepartmentID(inviteFormState.department);
+    //let deptID = inviteFormState.department;//await fetchDepartmentID(inviteFormState.department);
 
     //create body of post
     let body = {
       first: inviteFormState.first,
       last: inviteFormState.last,
       email: inviteFormState.email,
-      role: inviteFormState.accessTag,
+      //role: inviteFormState.accessTag,
+      department: inviteFormState.department,
+      accessTag: inviteFormState.accessTag
     };
 
     //otherwise post the user
-    postUser(deptID, body);
+    //postUser(deptID, body);
+
+    // send the data from the invite faculty form to the db to the users table
+    axios
+      .post(
+        "https://5c8yjiqti9.execute-api.us-east-2.amazonaws.com/dev/postAdmin",
+        {
+          first: inviteFormState.first,
+          last: inviteFormState.last,
+          email: inviteFormState.email,
+          department: inviteFormState.department,
+          accessTag: inviteFormState.accessTag
+    //inviteFormState
+        }
+      )
+      .then((Response) => {console.log(Response)})
+      .catch((Error) => { console.log(Error)})
 
     //success message
-    setSucessPopup(true);
-    setErrorPopup(false);
+    // setSucessPopup(true);
+    // setErrorPopup(false);
   };
 
   //Updates form state when radio button is selected for access tags for the new faculty form
@@ -162,6 +203,8 @@ function Admin_ManageFaculty() {
     setRender(render);
   };
 
+  
+
   return (
     <>
       {/* create admin menu bar */}
@@ -226,9 +269,10 @@ function Admin_ManageFaculty() {
                       className="admin-manage-faculty-department-dropdown"
                       onChange={updateDepartment}
                     >
+                      {/* changed dept.abbreviation to dept.dept_name to match db column name */}
                       <option key={0}>--Choose--</option>
                       {departments?.map((dept) => (
-                        <option key={dept.id}>{dept.abbreviation}</option>
+                        <option key={dept.id}>{dept.dept_name}</option>
                       ))}
                     </select>
                   </span>
