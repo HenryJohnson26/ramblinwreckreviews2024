@@ -118,8 +118,8 @@ function Admin_ManageFaculty() {
       .catch((Error) => { console.log(Error)})
 
     //success message
-    // setSucessPopup(true);
-    // setErrorPopup(false);
+     setSucessPopup(true);
+     setErrorPopup(false);
   };
 
   //Updates form state when radio button is selected for access tags for the new faculty form
