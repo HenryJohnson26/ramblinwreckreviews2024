@@ -29,6 +29,9 @@ function Wrapper() {
   }
 
   useEffect(() => {
+    if (location.pathname == '/' && !currentUser) {
+      navigate('/login');
+    }
     if (location.pathname.includes('admin')) {
       setRole(AuthStatusEnum.ADMIN);
     }
