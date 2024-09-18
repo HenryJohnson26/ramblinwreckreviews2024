@@ -13,14 +13,14 @@ import AWS_Authenticator from './AWS_Authenticator';
 
 function MenuBar() {
   const [imageUrl, setImageUrl] = useState(chevron_down); // State to track image viewed
-  const [isOpen, setIsOpen] = useState(false); // State to track menu visibility
+  const [isOpen, setIsOpen] = useState(true); // State to track menu visibility
   const [isPlusHovered, setIsPlusHovered] = useState(false); 
   const [isPersonHovered, setIsPersonHovered] = useState(false);
   const [isEditHovered, setIsEditHovered] = useState(false);
 
   const switchMenuBarVisibility = () => {
     setImageUrl(imageUrl === chevron_down ? chevron_right : chevron_down); // Toggle image viewed on button
-    setIsOpen(!isOpen); // Toggle menu visibility on click
+    //setIsOpen(!isOpen); // Toggle menu visibility on click
   };
 
   const menuItemImages = {

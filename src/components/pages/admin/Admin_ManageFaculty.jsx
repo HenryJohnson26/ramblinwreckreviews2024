@@ -42,6 +42,9 @@ function Admin_ManageFaculty() {
       });
   }, []);
 
+  // getting data from db for professors in a given department
+  const [profData, setProf] = useState([]);
+  
 
   //holds user input for the invitation form
   const [inviteFormState, setInviteFormState] = useState({
@@ -49,7 +52,7 @@ function Admin_ManageFaculty() {
     last: "",
     email: "",
     department: "",
-    accessTag: "",
+    accessTag: "prof",
   });
 
   //holds what department the user chooses from the dropdown in the activity status form
@@ -64,7 +67,7 @@ function Admin_ManageFaculty() {
   //stores deptID so multiple API calls are not made
   const [deptID, setDeptID] = useState();
 
-  
+  const [userID, setUserID] = useState();
 
   //load in all the departments using API loader call through React. This is set up to be linked in index.js
   //var departments = useLoaderData();
@@ -159,15 +162,32 @@ function Admin_ManageFaculty() {
     setActivationForm({ ...activationForm, department: event.target.value });
 
     //get department ID
-    let deptID = await fetchDepartmentID(event.target.value);
+    let deptID = event.target.value;
 
     //save the department ID
     setDeptID(deptID);
 
-    let users = await getUsersUnderDepartment(deptID);
-    setUsers(users);
-  };
+    //let users = "cs";//await getUsersUnderDepartment(deptID);
+    //setUsers(users);
+    axios
+    .get(
+      "https://3l2g4sxaue.execute-api.us-east-2.amazonaws.com/prod/department",
+        {
+          params: {
+            ftn: "getProfData",
+            params: deptID
+          },
+        }
+      )
+      .then(response => {
+        setUsers(JSON.parse(response.data.body));
+      })
+      .catch(error => {
+        console.log(error);
+      });
 
+  };
+  
   //displays if a user is active or not
   const displayStatus = (isActive) => {
     if (isActive === "true") {
@@ -181,8 +201,8 @@ function Admin_ManageFaculty() {
   const toggleStatus = async (userID, isActive) => {
     //toggle active tag
     isActive = !isActive;
-    let response = await updateUserStatus(deptID, userID, isActive);
-
+    let response = "fff";//await updateUserStatus(deptID, userID, isActive);
+    console.log(userID);
     let userCopy = users;
     //if toggle was successful, update the UI
     if (response.status === 201) {
@@ -203,13 +223,52 @@ function Admin_ManageFaculty() {
     setRender(render);
   };
 
+  const handleDataChange = async (event, userID, fld) => {
+    console.log(userID);//event.target.value);
+    let param = event.target.value;
+    let method = "";
+    //console.log(fld);
+    if(fld==="first"){
+      method = "updUserFirst";
+      param = param + ","+userID;
+    }
+    if(fld==="last"){
+      method = "updUserLast";
+      param = param + ","+userID;
+    }
+   
+    let body = {
+      getFtn: method,
+      par: param
+    };
+    
+    if(event.key === "Enter"){
+    axios
+      .post(
+        "https://3l2g4sxaue.execute-api.us-east-2.amazonaws.com/prod/department",
+        {
+            getFtn: method,
+            par: param
+        }
+      )
+      .then((Response) => {console.log(Response)})
+      .catch((Error) => { console.log(Error)})
+    }
+  };
+
+
+
   
 
   return (
     <>
+    <table  width="100%" border-color= "#21314d">
+      <tr >
+        <td width="4%" valign="top" bgcolor= "#21314d" border-color= "#21314d">{<MenuBar />}</td>
+        <td width="95%"  border-color= "#21314d">
       {/* create admin menu bar */}
       <div className='admin-manage-faculty-content-container'>
-        {<MenuBar />}
+        {/* {<MenuBar />} */}
         {/* Draws the section that displays the 'Preview Questions by Category' Box */}
         <div className="admin-manage-faculty-background-admin">
           <div className="admin-manage-faculty-card-content">
@@ -283,10 +342,11 @@ function Admin_ManageFaculty() {
                       <input
                         onChange={handleRadioButtons}
                         name="access"
-                        id="professor"
+                        id="prof"
                         type="radio"
+                        checked
                       ></input>
-                      <label htmlFor="professor">Professor</label>
+                      <label htmlFor="prof">Professor</label>
                       <input
                         onChange={handleRadioButtons}
                         name="access"
@@ -294,6 +354,14 @@ function Admin_ManageFaculty() {
                         type="radio"
                       ></input>
                       <label htmlFor="admin">Admin</label>
+                      <input
+                        onChange={handleRadioButtons}
+                        name="access"
+                        id="adm-prof"
+                        type="radio"
+                        
+                      ></input>
+                      <label htmlFor="admin">Admin and Professor</label>
                     </div>
                   </span>
                   <button className="admin-manage-faculty-invite-button">Invite</button>
@@ -349,9 +417,10 @@ function Admin_ManageFaculty() {
                     className="admin-manage-faculty-department-dropdown"
                     onChange={retrieveUsers}
                   >
+                    {/* changed dept.abbreviation to dept.dept_name to match db column name */}
                     <option key={0}>--Choose--</option>
-                    {departments?.map((dept) => (
-                      <option key={dept.id}>{dept.abbreviation}</option>
+                      {departments?.map((dept) => (
+                        <option key={dept.id}>{dept.dept_name}</option>
                     ))}
                   </select>
                 </span>
@@ -369,11 +438,11 @@ function Admin_ManageFaculty() {
                     </tr>
                     {users?.map((user) => {
                       // if the tag is admin, display in this table
-                      if (user.access_tags === "admin") {
+                      if (user.access_tags === "admin" || user.access_tags === "adm-prof") {
                         return (
                           <tr key={user.id}>
-                            <td>{user.first_name}</td>
-                            <td>{user.last_name}</td>
+                            <td><input type="text" placeholder={user.first_name} onKeyUp ={(e) => handleDataChange(e,user.id,"first")}></input></td>
+                            <td><input type="text" placeholder={user.last_name} onKeyUp={(e) => handleDataChange(e,user.id,"last")}></input></td>
                             <td>{user.email}</td>
                             <td>{displayStatus(user.active.toString())}</td>
                             <td>
@@ -400,7 +469,7 @@ function Admin_ManageFaculty() {
                     </tr>
                     {users?.map((user) => {
                       // if the tag is admin, display in this table
-                      if (user.access_tags === "professor") {
+                      if (user.access_tags === "prof" || user.access_tags === "adm-prof") {
                         return (
                           <tr key={user.id}>
                             <td className="admin-manage-faculty-td-first">{user.first_name}</td>
@@ -424,6 +493,9 @@ function Admin_ManageFaculty() {
           </div>
         </div>
       </div>
+      </td>
+      </tr>
+      </table>
     </>
   );
 }

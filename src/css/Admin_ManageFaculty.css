@@ -48,7 +48,7 @@
 }
   
 .admin-manage-faculty-background-admin {
-  background-color: #21314d;
+  background-color: white;
   height: 100%;
   margin-top: -10px;
   padding-top: 10px;
@@ -90,10 +90,10 @@
 }
 
 .admin-manage-faculty-invite-button {
-  width: 200px;
+  width: 100px;
   margin-bottom: 10px;
   margin-top: -15px;
-  margin-left: 80%;
+  margin-left: 60%;
   height: 50px;
   border-width: 1px;
   border-radius: 8px;
