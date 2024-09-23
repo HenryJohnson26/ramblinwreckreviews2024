@@ -4,6 +4,11 @@ import { useLoaderData } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { Popup } from "reactjs-popup";
 import MenuBar from '../../MenuBar';
+import { getDepartmentDD } from '../../../services/service';
+import { getDepartment } from '../../../services/service';
+
+import axios from "axios";
+
 
 export default function Admin_ManageFaculty() {
   //stores users under a selected department
@@ -41,7 +46,18 @@ export default function Admin_ManageFaculty() {
   
 
   //load in all the departments using API loader call through React. This is set up to be linked in index.js
-  var departments = useLoaderData();
+  //var departments = useLoaderData();
+
+  const [departments, setData] = useState([]);
+  useEffect(() => {
+
+   getDepartmentDD().then(res => {
+   setData(JSON.parse(res.body))
+//   console.log("ddd" +JSON.stringify(res.body,null,2))
+})
+},[])
+
+  //});
 
   //fired when invite faculty form is submitted
   const handleInviteFormSubmit = async (event) => {
@@ -224,8 +240,8 @@ export default function Admin_ManageFaculty() {
                       onChange={updateDepartment}
                     >
                       <option key={0}>--Choose--</option>
-                      {departments?.map((dept) => (
-                        <option key={dept.id}>{dept.abbreviation}</option>
+                      {departments.map(item  => (
+                        <option key={item.id}>{item.dept_name}</option>
                       ))}
                     </select>
                   </span>
