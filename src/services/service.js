@@ -16,10 +16,71 @@ const axiosInstance = axios({
  *    put should be handled by other endpoints with limited responsibilities.
  */
 
+export async function getDepartmentDD() {
+  // const response = await axiosInstance.get(`/department/{departmentId}`);
+  // return response.body;
+  
+  const resp= await 
+  axios
+  .get(
+    "https://3l2g4sxaue.execute-api.us-east-2.amazonaws.com/prod/department",
+      {
+        params: {
+          ftn: "getDept",
+          params: ""
+        },
+      }
+    )
+    // .then(response => {
+    //   //setData(JSON.parse(response.data.body));
+    //   console.log(JSON.stringify(response.data.body));
+    //   //let resp = JSON.stringify(response.data.body);
+    //    //resp = response.data.body;
+    //    //const json = JSON.stringify(response);
+    //    //return JSON.stringify(response.data.body);
+    // })
+    .catch(error => {
+      console.log(error);
+    });
+
+   // const data = await resp.json();
+    //let xx = response.data.body;
+    console.log("response  "+ resp.data);
+  return resp.data;
+}
+
 export async function getDepartment(departmentId) {
   // const response = await axiosInstance.get(`/department/{departmentId}`);
   // return response.body;
-  return {};
+  console.log(departmentId);
+
+  const resp= await 
+  axios
+  .get(
+    "https://3l2g4sxaue.execute-api.us-east-2.amazonaws.com/prod/department",
+      {
+        params: {
+          ftn: "getDeptById",
+          params: "3"
+        },
+      }
+    )
+    // .then(response => {
+    //   //setData(JSON.parse(response.data.body));
+    //   console.log(JSON.stringify(response.data.body));
+    //   //let resp = JSON.stringify(response.data.body);
+    //    //resp = response.data.body;
+    //    //const json = JSON.stringify(response);
+    //    //return JSON.stringify(response.data.body);
+    // })
+    .catch(error => {
+      console.log(error);
+    });
+
+   // const data = await resp.json();
+    //let xx = response.data.body;
+    console.log("response  "+ resp.data);
+  return resp.data;
 }
 
 export async function createDepartment(department) {
@@ -85,7 +146,25 @@ export async function updateQuestioWeights(department, weights) {
 export async function addDepartmentFacultyMember(facultyMember) {
   // const response = await axiosInstance.post(`/department/{currUser.adminDepartment}/faculty/`, facultyMember);
   // return response.body;
-  return facultyMember;
+
+  let method = "postUser";
+  let param = facultyMember;
+  let rtn =""
+
+  const resp= await 
+  axios
+      .post(
+        "https://3l2g4sxaue.execute-api.us-east-2.amazonaws.com/prod/department",
+        {
+            getFtn: method,
+            par: param
+        }
+      )
+      .then((Response) => {rtn=Response.data})
+      .catch((Error) => { console.log("Error")})
+
+      console.log("response  "+ JSON.stringify(rtn,null,2));
+  return rtn;
 }
 
 export async function updateDepartmentFacultyMember(facultyMember) {

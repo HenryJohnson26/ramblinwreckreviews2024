@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import '@aws-amplify/ui-react/styles.css';
 import PopupForm from "../add_list/PopupForm";
+import { addDepartmentFacultyMember } from '../../services/service';
+
 
 export default function TestPage() {
     
@@ -20,6 +22,7 @@ export default function TestPage() {
     }, [qList]);
 
     // state needed: formData, some list to view (just for this test page)
+    const [rtnfacultyFormData, setRtnFacultyFormData] = React.useState({});
     const [facultyFormData, setFacultyFormData] = React.useState({});
     const [fList, setFList] = React.useState([]);
     const onFacultySubmit = () => {
@@ -27,6 +30,19 @@ export default function TestPage() {
         // and update any states
         setFList((pl) => [...pl, facultyFormData]);
         setFacultyFormData({});
+        //console.log("facultyFormData " +JSON.stringify(facultyFormData['first_name'],null,2))
+        //if (facultyFormData.incudes("professor")) {
+            let par = facultyFormData['email']+','+facultyFormData['first_name']+','+facultyFormData['last_name']+',cs'
+        //}
+        //let par = facultyFormData['email']+','+facultyFormData['first_name']+','+facultyFormData['last_name']+',cs'
+        console.log("facultyFormData " + par)
+        console.log(facultyFormData);
+        //addDepartmentFacultyMember(par).then(res => {
+            //setRtnFacultyFormData(JSON.parse(res.body))
+           // console.log("ddd" +JSON.stringify(res,null,2))
+       // })
+       
+        //addDepartmentFacultyMember(facultyFormData);
     };
 
     useEffect(() => {
