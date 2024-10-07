@@ -4,6 +4,7 @@ import AdminCreateSurveyQuestions from './pages/admin/Admin_CreateSurveyQuestion
 import AdminEditQuestionWeights from './pages/admin/Admin_EditQuestionWeights';
 import AdminHome from './pages/admin/Admin_Home';
 import AdminManageFaculty from './pages/admin/Admin_ManageFaculty';
+import AdminCreateNewDepartment from './pages/admin/Admin_CreateNewDepartment';
 // professor page imports
 import ProfessorCreateCourse from './pages/professor/Professor_CreateCourse';
 import ProfessorEmailNotifications from './pages/professor/Professor_EmailNotifications';
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
         element: <ForgetPasswordResetPage />,
       },
       // for admin pages
+      {
+        path: "/admin/create-new-department",
+        element: <AdminCreateNewDepartment /> 
+      },
       {
         path: "/admin/create-survey-questions",
         element: <AdminCreateSurveyQuestions />,
