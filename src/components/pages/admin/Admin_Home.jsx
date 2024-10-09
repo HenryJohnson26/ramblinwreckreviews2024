@@ -32,9 +32,8 @@ export default function Admin_Home() {
             description="Modify multiple choice grade breakpoints"
             logo={scale}
           />
-          {/*NOTE: this page is NOT made yet, so it just keeps the same page*/}
           <NavCard 
-            route="/admin" /*"/admin/create-department" */
+            route="/admin/create-new-department" 
             title="Create Department"
             description="Initialize a department and assign an administrator"
             logo={plus}
