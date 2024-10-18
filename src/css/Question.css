@@ -96,7 +96,7 @@
 /* styling for the subtext */
 .student-take-survey-subtext-wrapper {
     font-size: 20px;
-    padding-bottom: 20px;
+    margin-bottom: 40px;
 }
 
 /* aligns the question bubbles vertically */
@@ -233,6 +233,7 @@
     display: table-cell;
     text-align: center;
     padding: 10px;
+    font-size: 25px;
 }
 
 .student-take-survey-slider-row {
@@ -243,6 +244,7 @@
     display: table-cell;
     text-align: left;
     font-weight: bold;
+    font-size: 20px;
     padding: 10px;
 }
 

@@ -1,21 +1,22 @@
 /* This is previous team code and our team did not touch this file*/
 import "../../../css/Admin_EditQuestionWeights.css";
 import React, { useState, useEffect } from "react";
-import { useLoaderData } from "react-router-dom";
 import { Popup } from "reactjs-popup";
 import MenuBar from '../../MenuBar';
+import { updateQuestionWeights } from "../../../services/service";
+import Question from "../../Question";
 
 export default function Admin_EditQuestionWeights() {
-  var departments = useLoaderData();
+  // var departmentID = useLoaderData();
 
-   //re-renders page without state change
-   const [forceRender, setRender] = useState(0);
+  //re-renders page without state change
+  const [forceRender, setRender] = useState(0);
 
   //handles changes that user makes to form
   const [formState, setFormState] = useState({
     department: "",
     num_categories: 2,
-    fields: ["Excellent", "Good", "'Placeholder'", "'Placeholder'", "'Placeholder'"],
+    fields: ["Excellent", "Good", "", "", ""],
     bubbles: 2,
     min: 0, //holds the min of the auto grading scale
     max: 100, //holds the max of the auto grading scale
@@ -26,22 +27,27 @@ export default function Admin_EditQuestionWeights() {
               [0, 0, 0, 0, 0]], //will hold an array of arrays, each number corresponds to grading scale of the radio button
   });
 
+  // onMount (pull data)
+  // can also use useLoaderData (import {useLoaderData} from 'react-router-dom';) for department/mcConfig, and just make sure to set state from here
+  useEffect(() => {
+    // TODO fetch department ID/prefill formstate
+    // response = await getQuestionWeights(departmentID);
+
+    // data transformation TODO use the db model
+
+    // setFormState(transformed_data);
+  }, [])
+
   useEffect(() => { // this hook will get called every time fields array
     // perform some action every time myArr is updated
     console.log('Updated State', forceRender)
   }, [forceRender])
-
-  //holds the department ID of the form
-  const [deptID, setDeptID] = useState(0);
 
   //holds the error popup for invalid max and min
   const [rangeErrorPopup, setRangeErrorPopup] = useState();
 
   //holds the setting scale success popup
   const [successPopup, setSucessPopup] = useState();
-
-  //holds the setting scale error popup
-  const [errorPopup, setErrorPopup] = useState();
 
   //holds the error popup in the input text boxes have an improper scale
   const [scaleErrorPopup, setScaleErrorPopup] = useState();
@@ -52,27 +58,6 @@ export default function Admin_EditQuestionWeights() {
 
     //post the grading scale
     postGradingScale();
-  };
-
-  //updates the department an user selects
-  const updateDepartment = async (event) => {
-    event.preventDefault();
-
-    //if the person choose '--Choose--', set to empty string for error handling
-    if (event.target.value === "--Choose--") {
-      setFormState({ ...formState, department: "" });
-      //set to zero for error handling
-      setDeptID(0);
-      return;
-    }
-
-    //set the state for what department is chosen
-    setFormState({ ...formState, department: event.target.value });
-    //get department ID
-    let deptID = await fetchDepartmentID(event.target.value);
-
-    //save the department ID
-    setDeptID(deptID);
   };
 
   //handles the number of categories slider
@@ -177,13 +162,6 @@ export default function Admin_EditQuestionWeights() {
       weights: weights
     }
 
-    //if department was not selected show error
-    if(deptID === 0) {
-      //show error popup
-      setErrorPopup(true);
-      return;
-    }
-
     //if scaled input was messed up show error
     if(checkScalingError()) {
       setScaleErrorPopup(true);
@@ -191,7 +169,7 @@ export default function Admin_EditQuestionWeights() {
     }
 
     //make put call
-    postDeptSettings(deptID, body);
+    updateQuestionWeights(formState.department, body);
 
     //show success message
     setSucessPopup(true);
@@ -237,20 +215,6 @@ export default function Admin_EditQuestionWeights() {
           <h3 className="add-question-title">Set Department Grading Scale</h3>
           <div id="form" className="form">
             <form onSubmit={handleFormSubmit}>
-              {/* Department dropdown, should later be removed when user authorization is added*/}
-              <span className="category-span">
-                <h3 className="form-subheaders">Department:</h3>
-                <select
-                  className="preview-question-dropdown"
-                  onChange={updateDepartment}
-                >
-                  <option key={0}>--Choose--</option>
-                  {departments?.map((dept) => (
-                    <option key={dept.id}>{dept.abbreviation}</option>
-                  ))}
-                </select>
-              </span>
-
               {/* Contains the input for the number of categories slider*/}
               <div>
                 <h4>Number of Question Fields: {formState.num_categories}</h4>
@@ -412,25 +376,6 @@ export default function Admin_EditQuestionWeights() {
               </div>
             </Popup>
 
-            {/* Error message for invalid form input*/}
-            <Popup
-              open={errorPopup}
-              onClose={() => setErrorPopup(false)}
-              position="right center"
-            >
-              <div className="content-box-error">
-                <p className="content-text">
-                  Oops! Something went wrong with the form input. Make sure department is specified. Please try again.
-                </p>
-                <button
-                  onClick={() => setErrorPopup(false)}
-                  className="popup-button"
-                >
-                  Close
-                </button>
-              </div>
-            </Popup>
-
             {/* Success message for valid form input and post*/}
             <Popup
               open={successPopup}
@@ -472,10 +417,18 @@ export default function Admin_EditQuestionWeights() {
             <div className="preview">
               {/* Shows the preview of what a question looks like */}
               <div className="content">
-                <h2>Preview</h2>
-                <p>This is how a question looks like on a survey. The numbers represent the grading scale. You can click the values and edit them if you
-                  want to override the autoscaled grading.
-                </p>
+                <Question
+                  questionData={{
+                    question: "Preview",
+                    subtext: "This is how a question looks like on a survey. The numbers represent the grading scale. You can click the values and edit them if you want to override the autoscaled grading.",
+                    type: "bubble",
+                    mcConfig: {
+                      numBubbles: formState.bubbles,
+                      categories: formState.fields
+                    },
+                    mcRows: ["Example"]
+                  }}
+                />
                 <div id="button-container" className="radio-button-container">
                   {/* Show if there there are more than zero categories */}
                   {formState.num_categories > 0 &&

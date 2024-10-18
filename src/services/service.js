@@ -69,10 +69,16 @@ export async function deleteQuestion(questionId) {
  *    post/delete not needed, one to one with department.
  */
 
-export async function updateQuestioWeights(department, weights) {
+export async function updateQuestionWeights(department, weights) {
   // const response = await axiosInstance.put(`/department/${department.id}/mcqweights`, weights);
   // return response.body;
   return weights;
+}
+
+export async function getQuestionWeights(department) {
+  // const response = await axiosInstance.get(`/department/${department.id}/mcqweights`, weights);
+  // return response.body;
+  return true;
 }
 
 /**

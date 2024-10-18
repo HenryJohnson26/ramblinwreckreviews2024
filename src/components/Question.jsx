@@ -29,7 +29,8 @@ function BubbleQuestion({mcConfig, rowNames, isRequired, bubbleData, setBubbleDa
                     <div className="student-take-survey-slider-row-name">
                         {rowName}
                     </div>
-                    {mcConfig.categories.map((category, categoryIndex) => (
+                    {mcConfig.categories.map((category, categoryIndex) => {
+                        {return category.length > 0 ? // may be empty categories (don't want to display these)
                         <div key={categoryIndex} className="student-take-survey-slider-row-option">
                             {bubbles.map((value) => (
                                 <button
@@ -39,7 +40,7 @@ function BubbleQuestion({mcConfig, rowNames, isRequired, bubbleData, setBubbleDa
                                 />
                             ))}
                         </div>
-                    ))}
+                        : null }})}
                 </div>
             ))}
         </div>
