@@ -52,6 +52,9 @@ export default function Admin_EditQuestionWeights() {
   //holds the error popup in the input text boxes have an improper scale
   const [scaleErrorPopup, setScaleErrorPopup] = useState();
 
+  //holds the error popup if the categories are not properly filled out
+  const [categoryErrorPopup, setCategoryErrorPopup] = useState(false);
+
   //Event that is fired when the button to submit the question is clicked
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -62,7 +65,12 @@ export default function Admin_EditQuestionWeights() {
 
   //handles the number of categories slider
   const handleCategorySlider = (event) => {
-    setFormState({ ...formState, num_categories: event.target.value });
+    if (event.target.value < formState.num_categories) {
+      // when we decrease the slider, make sure to update field names
+      setFormState({...formState, num_categories: event.target.value, fields: formState.fields.map((value, index) => index < formState.num_categories - 1 ? value : "")})
+    } else {
+      setFormState({ ...formState, num_categories: event.target.value });
+    }
   };
 
   //handles the number of bubble per category slider
@@ -168,22 +176,16 @@ export default function Admin_EditQuestionWeights() {
       return;
     }
 
+    if (checkCategoryError()) {
+      setCategoryErrorPopup(true);
+      return;
+    }
+
     //make put call
     updateQuestionWeights(formState.department, body);
 
     //show success message
     setSucessPopup(true);
-  }
-
-  //allows the admin to override the autoscaling 
-  const updateWeights = (row, col, event) => {
-    //update the weights array given the text input
-    var weights = formState.weights;
-    //var oldVal = weights[row][col]
-    weights[row][col] = Number(event.target.value);
-
-    //set new state
-    setFormState({...formState, weights: weights})
   }
 
   //sees if the admin is inputing an invalid value
@@ -202,6 +204,15 @@ export default function Admin_EditQuestionWeights() {
     }
 
     //if no error, return false
+    return false;
+  }
+
+  const checkCategoryError = () => {
+    for (let i = 0; i < formState.num_categories; i++) {
+      if (formState.fields[i] === "") { // non-empty
+        return true;
+      }
+    }
     return false;
   }
 
@@ -234,70 +245,19 @@ export default function Admin_EditQuestionWeights() {
               {/* Contains the category titles*/}
               <div>
                 <h4>Category Titles:</h4>
-                {/* Only render if the number of categories is > 0 */}
-                {formState.num_categories > 0 && (
+                {formState.fields.map((field, index) => {
+                  return index < formState.num_categories ?
                   <span className="input-category-span">
-                    <h5 className="input-category-subheader">Category 1: </h5>
+                    <h5 className="input-category-subheader">Category {index + 1}: </h5>
                     <input
                       className="input-category-name"
-                      value={formState.fields[0]}
-                      onChange={(e) => {updateCategoryNames(e, 0)}}
-                      placeholder="Click to edit. Ex: 'Excellent'"
+                      value={field}
+                      onChange={(e) => {updateCategoryNames(e, index)}}
+                      placeholder={`Click to edit. Ex: '${index === 2 ? "Satisfactory" : index === 3 ? "Below Average" : index === 4 ? "Poor": "Excellent"}'`}
                     ></input>
                   </span>
-                )}
-
-                {/* Only render if the number of categories is > 1 */}
-                {formState.num_categories > 1 && (
-                  <span className="input-category-span">
-                    <h5 className="input-category-subheader">Category 2: </h5>
-                    <input
-                      className="input-category-name"
-                      value={formState.fields[1]}
-                      onChange={(e) => {updateCategoryNames(e, 1)}}
-                      placeholder="Click to edit. Ex: 'Good'"
-                    ></input>
-                  </span>
-                )}
-
-                {/* Only render if the number of categories is > 2 */}
-                {formState.num_categories > 2 && (
-                  <span className="input-category-span">
-                    <h5 className="input-category-subheader">Category 3: </h5>
-                    <input
-                      className="input-category-name"
-                      value={formState.fields[2]}
-                      onChange={(e) => {updateCategoryNames(e, 2)}}
-                      placeholder="Click to edit. Ex: 'Satisfactory'"
-                    ></input>
-                  </span>
-                )}
-
-                {/* Only render if the number of categories is > 3 */}
-                {formState.num_categories > 3 && (
-                  <span className="input-category-span">
-                    <h5 className="input-category-subheader">Category 4: </h5>
-                    <input
-                      className="input-category-name"
-                      value={formState.fields[3]}
-                      onChange={(e) => {updateCategoryNames(e, 3)}}
-                      placeholder="Click to edit. Ex: 'Below Average'"
-                    ></input>
-                  </span>
-                )}
-
-                {/* Only render if the number of categories is > 4 */}
-                {formState.num_categories > 4 && (
-                  <span className="input-category-span">
-                    <h5 className="input-category-subheader">Category 5: </h5>
-                    <input
-                      className="input-category-name"
-                      value={formState.fields[4]}
-                      onChange={(e) => {updateCategoryNames(e, 4)}}
-                      placeholder="Click to edit. Ex: 'Poor'"
-                    ></input>
-                  </span>
-                )}
+                  : null;
+                })}
               </div>
 
               {/* Setting number of bubbles under each category*/}
@@ -414,220 +374,41 @@ export default function Admin_EditQuestionWeights() {
               </div>
             </Popup>
 
+            {/* Error message for invalid category values */}
+            <Popup
+              open={categoryErrorPopup}
+              onClose={() => setCategoryErrorPopup(false)}
+              position="right center"
+            >
+              <div className="content-box-error">
+                <p className="content-text">
+                  Oh no! It seems you're category names are invalid, make sure all categories are given a title.
+                </p>
+                <button
+                  onClick={() => setCategoryErrorPopup(false)}
+                  className="popup-button"
+                >
+                  Close
+                </button>
+              </div>
+            </Popup>
+
             <div className="preview">
               {/* Shows the preview of what a question looks like */}
               <div className="content">
                 <Question
+                  formData={formState.weights}
+                  setFormData={setFormState}
                   questionData={{
                     question: "Preview",
                     subtext: "This is how a question looks like on a survey. The numbers represent the grading scale. You can click the values and edit them if you want to override the autoscaled grading.",
-                    type: "bubble",
+                    type: "preview",
                     mcConfig: {
                       numBubbles: formState.bubbles,
                       categories: formState.fields
-                    },
-                    mcRows: ["Example"]
+                    }
                   }}
                 />
-                <div id="button-container" className="radio-button-container">
-                  {/* Show if there there are more than zero categories */}
-                  {formState.num_categories > 0 &&
-                  <div className="category" id="category1">
-                    <h4 className="category-header">{formState.fields[0]}</h4>
-                    {/* TODO make these dynamic rendering within a JS function*/}
-                    {formState.bubbles > 0 &&
-                      <span>
-                        <input name="grade" id="category1button1" type="radio"></input>
-                        <input type='text' className="radio-text-box"value={formState.weights[0][0]} onChange={(e) => updateWeights(0,0, e)}></input>
-                      </span>
-                    }
-                    {formState.bubbles > 1 &&
-                      <span>
-                        <input name="grade" id="category1button2" type="radio"></input>
-                        <input type='text' className="radio-text-box"value={formState.weights[0][1]} onChange={(e) => updateWeights(0,1, e)}></input>
-                      </span>
-                    }
-                    {formState.bubbles > 2 &&
-                      <span>
-                        <input name="grade" id="category1button3" type="radio"></input>
-                        <input type='text' className="radio-text-box"value={formState.weights[0][2]} onChange={(e) => updateWeights(0,2, e)}></input>
-                      </span>
-                    }
-                    {formState.bubbles > 3 &&
-                      <span>
-                        <input name="grade" id="category1button4" type="radio"></input>
-                        <input type='text' className="radio-text-box"value={formState.weights[0][3]} onChange={(e) => updateWeights(0,3, e)}></input>
-                      </span>
-                    }
-                    {formState.bubbles > 4 &&
-                      <span>
-                        <input name="grade" id="category1button5" type="radio"></input>
-                        <input type='text' className="radio-text-box"value={formState.weights[0][4]} onChange={(e) => updateWeights(0,4, e)}></input>
-                      </span>
-                    }
-                  </div>
-                  }
-
-                  {/* Show if there there are more than 1 categories */}
-                  {formState.num_categories > 1 &&
-                  <div id="category2">
-                    <div className="category" id="category2">
-                      <h4 className="category-header">{formState.fields[1]}</h4>
-                      {/* TODO make these dynamic rendering within a JS function*/}
-                      {formState.bubbles > 0 &&
-                        <span>
-                          <input name="grade" id="category2button1" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[1][0]} onChange={(e) => updateWeights(1,0, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 1 &&
-                        <span>
-                          <input name="grade" id="category2button2" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[1][1]} onChange={(e) => updateWeights(1,1, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 2 &&
-                        <span>
-                          <input name="grade" id="category2button3" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[1][2]} onChange={(e) => updateWeights(1,2, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 3 &&
-                        <span>
-                          <input name="grade" id="category2button4" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[1][3]} onChange={(e) => updateWeights(1,3, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 4 &&
-                        <span>
-                          <input name="grade" id="category2button5" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[1][4]} onChange={(e) => updateWeights(1,4, e)}></input>
-                        </span>
-                      }
-                    </div>
-                  </div>
-                  }
-
-                  {/* Show if there there are more than 2 categories */}
-                  {formState.num_categories > 2 &&
-                  <div id="category3">
-                    <div className="category" id="category2">
-                      <h4 className="category-header">{formState.fields[2]}</h4>
-                      {/* TODO make these dynamic rendering within a JS function*/}
-                      {formState.bubbles > 0 &&
-                        <span>
-                          <input name="grade" id="category3button1" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[2][0]} onChange={(e) => updateWeights(2,0, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 1 &&
-                        <span>
-                          <input name="grade" id="category3button2" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[2][1]} onChange={(e) => updateWeights(2,1, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 2 &&
-                        <span>
-                          <input name="grade" id="category3button3" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[2][2]} onChange={(e) => updateWeights(2,2, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 3 &&
-                        <span>
-                          <input name="grade" id="category3button4" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[2][3]} onChange={(e) => updateWeights(2,3, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 4 &&
-                        <span>
-                          <input name="grade" id="category3button5" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[2][4]} onChange={(e) => updateWeights(2,4, e)}></input>
-                        </span>
-                      }
-                    </div>
-                  </div>
-                  }
-
-                  {/* Show if there there are more than 3 categories */}
-                  {formState.num_categories > 3 &&
-                  <div id="category4">
-                    <div className="category" id="category2">
-                      <h4 className="category-header">{formState.fields[3]}</h4>
-                      {/* TODO make these dynamic rendering within a JS function*/}
-                      {formState.bubbles > 0 &&
-                        <span>
-                          <input name="grade" id="category4button1" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[3][0]} onChange={(e) => updateWeights(3,0, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 1 &&
-                        <span>
-                          <input name="grade" id="category4button2" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[3][1]} onChange={(e) => updateWeights(3,1, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 2 &&
-                        <span>
-                          <input name="grade" id="category4button3" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[3][2]} onChange={(e) => updateWeights(3,2, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 3 &&
-                        <span>
-                          <input name="grade" id="category4button4" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[3][3]} onChange={(e) => updateWeights(3,3, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 4 &&
-                        <span>
-                          <input name="grade" id="category4button5" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[3][4]} onChange={(e) => updateWeights(3,4, e)}></input>
-                        </span>
-                      }
-                    </div>
-                  </div>
-                  }
-
-                  {/* Show if there there are more than 4 categories */}
-                  {formState.num_categories > 4 &&
-                  <div id="category5">
-                    <div className="category" id="category2">
-                      <h4 className="category-header">{formState.fields[4]}</h4>
-                      {/* TODO make these dynamic rendering within a JS function*/}
-                      {formState.bubbles > 0 &&
-                        <span>
-                          <input name="grade" id="category5button1" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[4][0]} onChange={(e) => updateWeights(4,0, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 1 &&
-                        <span>
-                          <input name="grade" id="category5button2" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[4][1]} onChange={(e) => updateWeights(4,1, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 2 &&
-                        <span>
-                          <input name="grade" id="category5button3" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[4][2]} onChange={(e) => updateWeights(4,2, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 3 &&
-                        <span>
-                          <input name="grade" id="category5button4" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[4][3]} onChange={(e) => updateWeights(4,3, e)}></input>
-                        </span>
-                      }
-                      {formState.bubbles > 4 &&
-                        <span>
-                          <input name="grade" id="category5button5" type="radio"></input>
-                          <input type='text' className="radio-text-box"value={formState.weights[4][4]} onChange={(e) => updateWeights(4,4, e)}></input>
-                        </span>
-                      }
-                    </div>
-                  </div>
-                  }
-                </div>
               </div>
             </div>
           </div>

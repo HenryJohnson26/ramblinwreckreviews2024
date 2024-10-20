@@ -47,6 +47,75 @@ function BubbleQuestion({mcConfig, rowNames, isRequired, bubbleData, setBubbleDa
     )
 }
 
+// Purely for viewing a preview when editing question weights
+function PreviewBubbleQuestion({mcConfig, weightData, setWeightData}) {
+    const [selectedBubble, setSelectedBubble] = React.useState("");
+    const bubbles = Array.from({ length: mcConfig.numBubbles }, (_, i) => i + 1);
+
+    const handleWeightChange = (categoryIndex, index, event) => {
+        const value = parseInt(event.target.value ? event.target.value : 0); 
+
+        setWeightData((pwd) => {
+            const nwd = [...pwd.weights];
+            nwd[categoryIndex][index-1] = value;
+            return {...pwd, weights: nwd};
+        })
+    }
+
+    return (
+        <div className="student-take-survey-slider-table">
+            <div className="student-take-survey-slider-header">
+                {/* empty div to space above names (lines up bubbles and categories) */}
+                <div className="student-take-survey-slider-header-option" />
+                {mcConfig.categories.map((category, index) => {
+                    {return category.length > 0 && // make sure it lines up properly on the preview
+                    <div key={index} className="student-take-survey-slider-header-option">
+                        {category}
+                    </div>
+                    }
+            })}
+            </div>
+
+            <div className="student-take-survey-slider-row">
+                <div className="student-take-survey-slider-row-name">
+                   Example
+                </div>
+                {mcConfig.categories.map((category, categoryIndex) => {
+                    {return category.length > 0 ? // may be empty categories (don't want to display these)
+                    <div key={categoryIndex} className="student-take-survey-slider-row-option">
+                        {bubbles.map((value) => (
+                            <button
+                                key={value}
+                                className={`student-take-survey-slider-button ${selectedBubble === `${category}-${value}` ? 'selected' : ''}`}
+                                onClick={() => setSelectedBubble(`${category}-${value}`)}
+                            />
+                        ))}
+                    </div>
+                    : null }})}
+            </div>
+            <div className="student-take-survey-slider-row">
+                <div className="student-take-survey-slider-row-name">
+                   Grade
+                </div>
+                {mcConfig.categories.map((category, categoryIndex) => {
+                    {return category.length > 0 ?
+                    <div key={categoryIndex} className="student-take-survey-slider-row-option">
+                        {bubbles.map((value) => (
+                            <input
+                                key={value}
+                                type='text'
+                                value={weightData[categoryIndex][value-1]}
+                                onChange={(e) => handleWeightChange(categoryIndex, value, e)}
+                                className="student-take-survey-weight-input"
+                            />
+                        ))}
+                    </div>
+                    : null }})}
+            </div>
+        </div>
+    )
+}
+
 function TextQuestion({ isRequired, textData, setTextData }) {
     const onChange = (e) => {
         setTextData(e.target.value);
@@ -71,7 +140,7 @@ export default function Question({
     questionData = {
         question: "Example Question",
         subtext: "subtext",
-        type: "bubble", // or "text"
+        type: "bubble", // "text", "bubble", or "preview"
         mcConfig: {
             numBubbles: 3,
             categories: ["Excellent", "Good", "Average", "Poor", "Very Poor"]
@@ -119,6 +188,12 @@ export default function Question({
                     <TextQuestion 
                         textData={controlled ? formData : selfState}
                         setTextData={controlled ? setFormData : setSelfState}
+                    /> ||
+                    questionData.type === "preview" && 
+                    <PreviewBubbleQuestion 
+                        mcConfig={questionData.mcConfig}
+                        weightData={controlled ? formData : selfState}
+                        setWeightData={controlled ? setFormData : setSelfState}
                     />
                 }
             </div>

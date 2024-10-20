@@ -274,3 +274,11 @@
     background-color: #879EC3;
     color: white;
 }
+
+.student-take-survey-weight-input {
+    width: 30px;
+    margin: 5px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid;
+}
