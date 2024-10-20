@@ -6,6 +6,7 @@ import MenuBar from '../../MenuBar';
 import { updateQuestionWeights, getQuestionWeights } from "../../../services/service";
 import Question from "../../Question";
 import { useSelector } from 'react-redux';
+import { View } from "@aws-amplify/ui-react";
 
 export default function Admin_EditQuestionWeights() {
   // TODO get current user and department
@@ -222,198 +223,195 @@ export default function Admin_EditQuestionWeights() {
   }
 
   return (
-    <>
+    <View style={{display: 'flex', flexDirection: 'row', height: '100%', width: '100%'}}>
       {/* create admin menu bar */}
-        <div className='content-container'>
-          {<MenuBar />}
-        {/* Draws the section that allows the admin to enter the grading scale content and save it for their department*/}
-        <div>
-          <h3 className="add-question-title">Set Department Grading Scale</h3>
-          <div id="form" className="form">
-            <form onSubmit={handleFormSubmit}>
-              {/* Contains the input for the number of categories slider*/}
-              <div>
-                <h4>Number of Question Fields: {formState.num_categories}</h4>
-                <p>
-                  For example, fields can be the names of categories such as:
-                  Excellent, Good, Unsatisfactory, etc.
-                </p>
-                <input
-                  type="range"
-                  min="2"
-                  max="5"
-                  value={formState.num_categories}
-                  onChange={handleCategorySlider}
-                ></input>
-              </div>
-
-              {/* Contains the category titles*/}
-              <div>
-                <h4>Category Titles:</h4>
-                {formState.fields.map((field, index) => {
-                  return index < formState.num_categories ?
-                  <span className="input-category-span">
-                    <h5 className="input-category-subheader">Category {index + 1}: </h5>
-                    <input
-                      className="input-category-name"
-                      value={field}
-                      onChange={(e) => {updateCategoryNames(e, index)}}
-                      placeholder={`Click to edit. Ex: '${index === 2 ? "Satisfactory" : index === 3 ? "Below Average" : index === 4 ? "Poor": "Excellent"}'`}
-                    ></input>
-                  </span>
-                  : null;
-                })}
-              </div>
-
-              {/* Setting number of bubbles under each category*/}
-              <div>
-                <h4>
-                  Number of Bubbles Under Each Category: {formState.bubbles}
-                </h4>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={formState.bubbles}
-                  onChange={handleBubbleSlider}
-                ></input>
-              </div>
-
-              {/* Autoscaling with min-max feature */}
-              <div>
-                <h4>Category Grades Autoscaling:</h4>
-                <p>
-                  Entering a min and max will automatically set the grading scale
-                  for all the bubbles under each category.
-                </p>
-                <span className="input-range-span">
-                  <span className="input-range-span">
-                    <h5 className="input-range-subheader">
-                      Enter minimum grade value:
-                    </h5>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      className="input-range"
-                      value={formState.min}
-                      onChange={handleMin} 
-                      placeholder="min"
-                    ></input>
-                  </span>
-                  <span className="input-category-span">
-                    <h5 className="input-category-subheader">
-                      Enter maximum grade value:
-                    </h5>
-                    <input
-                      type="number"
-                      className="input-range"
-                      min="1"
-                      max="100"
-                      value={formState.max}
-                      onChange={handleMax} 
-                      placeholder="max"
-                    ></input>
-                  </span>
-                  <button type="button" onClick={autoscale} className="autoscale-button">Autoscale</button>
+      <MenuBar />
+      {/* Draws the section that allows the admin to enter the grading scale content and save it for their department*/}
+      <View style={{width: '100%', overflow: 'scroll'}}>
+        <div id="form" className="form">
+          <form onSubmit={handleFormSubmit}>
+            {/* Contains the input for the number of categories slider*/}
+            <div>
+              <h4>Number of Question Fields: {formState.num_categories}</h4>
+              <p>
+                For example, fields can be the names of categories such as:
+                Excellent, Good, Unsatisfactory, etc.
+              </p>
+              <input
+                type="range"
+                min="2"
+                max="5"
+                value={formState.num_categories}
+                onChange={handleCategorySlider}
+              ></input>
+            </div>
+            {/* Contains the category titles*/}
+            <div>
+              <h4>Category Titles:</h4>
+              {formState.fields.map((field, index) => {
+                return index < formState.num_categories ?
+                <span className="input-category-span">
+                  <h5 className="input-category-subheader">Category {index + 1}: </h5>
+                  <input
+                    className="input-category-name"
+                    value={field}
+                    onChange={(e) => {updateCategoryNames(e, index)}}
+                    placeholder={`Click to edit. Ex: '${index === 2 ? "Satisfactory" : index === 3 ? "Below Average" : index === 4 ? "Poor": "Excellent"}'`}
+                  ></input>
                 </span>
-              </div>
-              <div>
-                <button type="onSubmit" className="set-grading-button">Save Settings to Department</button>
-              </div>
-            </form>
-            {/* Preview of the question, allowing them to manual override weights */}
-            <Question
-              formData={formState.weights}
-              setFormData={setFormState}
-              questionData={{
-                question: "Preview",
-                subtext: "This is how a question looks like on a survey. The numbers represent the grading scale. You can click the values and edit them if you want to override the autoscaled grading.",
-                type: "preview",
-                mcConfig: {
-                  numBubbles: formState.bubbles,
-                  categories: formState.fields
-                }
-              }}
-            />
-            {/* Error message for invalid min-max */}
-            <Popup
-              open={rangeErrorPopup}
-              onClose={() => setRangeErrorPopup(false)}
-              position="right center"
-            >
-              <div className="content-box-error">
-                <p className="content-text">
-                  Oops! Invalid Range. Please Try Again.
-                </p>
-                <button
-                  onClick={() => setRangeErrorPopup(false)}
-                  className="popup-button"
-                >
-                  Close
-                </button>
-              </div>
-            </Popup>
+                : null;
+              })}
+            </div>
 
-            {/* Success message for valid form input and post*/}
-            <Popup
-              open={successPopup}
-              onClose={() => setSucessPopup(false)}
-              position="right center"
-            >
-              <div className="content-box-success">
-                <p className="content-text">
-                  Great! Your settings have been posted to your department!
-                </p>
-                <button
-                  onClick={() => setSucessPopup(false)}
-                  className="popup-button"
-                >
-                  Close
-                </button>
-              </div>
-            </Popup>
+            {/* Setting number of bubbles under each category*/}
+            <div>
+              <h4>
+                Number of Bubbles Under Each Category: {formState.bubbles}
+              </h4>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                value={formState.bubbles}
+                onChange={handleBubbleSlider}
+              ></input>
+            </div>
 
-            {/* Error message for invalid user scaling*/}
-            <Popup
-              open={scaleErrorPopup}
-              onClose={() => setScaleErrorPopup(false)}
-              position="right center"
-            >
-              <div className="content-box-error">
-                <p className="content-text">
-                  Oh no! It seems your scale is invalid. Make sure no entry to the right is greater or equal to the entry on its left.
-                </p>
-                <button
-                  onClick={() => setScaleErrorPopup(false)}
-                  className="popup-button"
-                >
-                  Close
-                </button>
-              </div>
-            </Popup>
+            {/* Autoscaling with min-max feature */}
+            <div>
+              <h4>Category Grades Autoscaling:</h4>
+              <p>
+                Entering a min and max will automatically set the grading scale
+                for all the bubbles under each category.
+              </p>
+              <span className="input-range-span">
+                <span className="input-range-span">
+                  <h5 className="input-range-subheader">
+                    Enter minimum grade value:
+                  </h5>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="input-range"
+                    value={formState.min}
+                    onChange={handleMin} 
+                    placeholder="min"
+                  ></input>
+                </span>
+                <span className="input-category-span">
+                  <h5 className="input-category-subheader">
+                    Enter maximum grade value:
+                  </h5>
+                  <input
+                    type="number"
+                    className="input-range"
+                    min="1"
+                    max="100"
+                    value={formState.max}
+                    onChange={handleMax} 
+                    placeholder="max"
+                  ></input>
+                </span>
+                <button type="button" onClick={autoscale} className="autoscale-button">Autoscale</button>
+              </span>
+            </div>
+            <div>
+              <button type="onSubmit" className="set-grading-button">Save Settings to Department</button>
+            </div>
+          </form>
+          {/* Preview of the question, allowing them to manual override weights */}
+          <Question
+            formData={formState.weights}
+            setFormData={setFormState}
+            questionData={{
+              question: "Preview",
+              subtext: "This is how a question looks like on a survey. The numbers represent the grading scale. You can click the values and edit them if you want to override the autoscaled grading.",
+              type: "preview",
+              mcConfig: {
+                numBubbles: formState.bubbles,
+                categories: formState.fields
+              }
+            }}
+          />
+          {/* Error message for invalid min-max */}
+          <Popup
+            open={rangeErrorPopup}
+            onClose={() => setRangeErrorPopup(false)}
+            position="right center"
+          >
+            <div className="content-box-error">
+              <p className="content-text">
+                Oops! Invalid Range. Please Try Again.
+              </p>
+              <button
+                onClick={() => setRangeErrorPopup(false)}
+                className="popup-button"
+              >
+                Close
+              </button>
+            </div>
+          </Popup>
 
-            {/* Error message for invalid category values */}
-            <Popup
-              open={categoryErrorPopup}
-              onClose={() => setCategoryErrorPopup(false)}
-              position="right center"
-            >
-              <div className="content-box-error">
-                <p className="content-text">
-                  Oh no! It seems you're category names are invalid, make sure all categories are given a title.
-                </p>
-                <button
-                  onClick={() => setCategoryErrorPopup(false)}
-                  className="popup-button"
-                >
-                  Close
-                </button>
-              </div>
-            </Popup>
-          </div>
+          {/* Success message for valid form input and post*/}
+          <Popup
+            open={successPopup}
+            onClose={() => setSucessPopup(false)}
+            position="right center"
+          >
+            <div className="content-box-success">
+              <p className="content-text">
+                Great! Your settings have been posted to your department!
+              </p>
+              <button
+                onClick={() => setSucessPopup(false)}
+                className="popup-button"
+              >
+                Close
+              </button>
+            </div>
+          </Popup>
+
+          {/* Error message for invalid user scaling*/}
+          <Popup
+            open={scaleErrorPopup}
+            onClose={() => setScaleErrorPopup(false)}
+            position="right center"
+          >
+            <div className="content-box-error">
+              <p className="content-text">
+                Oh no! It seems your scale is invalid. Make sure no entry to the right is greater or equal to the entry on its left.
+              </p>
+              <button
+                onClick={() => setScaleErrorPopup(false)}
+                className="popup-button"
+              >
+                Close
+              </button>
+            </div>
+          </Popup>
+
+          {/* Error message for invalid category values */}
+          <Popup
+            open={categoryErrorPopup}
+            onClose={() => setCategoryErrorPopup(false)}
+            position="right center"
+          >
+            <div className="content-box-error">
+              <p className="content-text">
+                Oh no! It seems you're category names are invalid, make sure all categories are given a title.
+              </p>
+              <button
+                onClick={() => setCategoryErrorPopup(false)}
+                className="popup-button"
+              >
+                Close
+              </button>
+            </div>
+          </Popup>
         </div>
-      </div>
-    </>
+        <div style={{height:60}} />
+      </View>
+    </View>
   );
 }

@@ -38,7 +38,7 @@
   width: 200px;
   border-radius: 5px;
   border-width: 1px;
-  height: 25px;
+  height: 30px;
 }
 
 .input-category-span {
@@ -63,7 +63,7 @@
   width: 50px;
   border-radius: 5px;
   border-width: 1px;
-  height: 20px;
+  height: 25px;
   margin-top: 1px;
 }
 
@@ -84,7 +84,8 @@
   border-radius: 8px;
   font-size: 20px;
   background-color: #21314d;
-  color:white
+  color:white;
+  cursor: pointer;
   }
 
 .autoscale-button {
@@ -96,7 +97,8 @@
   border-radius: 8px;
   font-size: 16px;
   background-color: #21314d;
-  color:white
+  color:white;
+  cursor: pointer;
 }
 
 .preview {
