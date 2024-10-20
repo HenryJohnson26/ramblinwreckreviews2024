@@ -3,18 +3,17 @@ import "../../../css/Admin_EditQuestionWeights.css";
 import React, { useState, useEffect } from "react";
 import { Popup } from "reactjs-popup";
 import MenuBar from '../../MenuBar';
-import { updateQuestionWeights } from "../../../services/service";
+import { updateQuestionWeights, getQuestionWeights } from "../../../services/service";
 import Question from "../../Question";
+import { useSelector } from 'react-redux';
 
 export default function Admin_EditQuestionWeights() {
-  // var departmentID = useLoaderData();
-
-  //re-renders page without state change
-  const [forceRender, setRender] = useState(0);
+  // TODO get current user and department
+  // const currentUser = useSelector((state => state.auth.user));
+  const [adminDepartment, setAdminDepartment] = useState(null);
 
   //handles changes that user makes to form
   const [formState, setFormState] = useState({
-    department: "",
     num_categories: 2,
     fields: ["Excellent", "Good", "", "", ""],
     bubbles: 2,
@@ -27,21 +26,23 @@ export default function Admin_EditQuestionWeights() {
               [0, 0, 0, 0, 0]], //will hold an array of arrays, each number corresponds to grading scale of the radio button
   });
 
-  // onMount (pull data)
-  // can also use useLoaderData (import {useLoaderData} from 'react-router-dom';) for department/mcConfig, and just make sure to set state from here
-  useEffect(() => {
-    // TODO fetch department ID/prefill formstate
-    // response = await getQuestionWeights(departmentID);
+  
 
-    // data transformation TODO use the db model
+  // TODO pull previous multiple choice config
+  // useEffect(() => {
+  //   //get the actual department of the current user
+  //   if(currentUser) {
+  //     const adminDept = currentUser.roles.find(role => role.user_type == 'admin' && role.resource_type == 'dept' && role.status == true)?.resource_id;
+  //     setAdminDepartment(adminDept);
+  //     getQuestionWeights(adminDept)
+  //       .then((weights) => {
+  //         // TODO data transformation
+  //         // const transformed_data = {...formState}; // would prefer a deep-copy
+  //         // setFormState(transformed_data);
+  //       });
+  //   }
+  // }, [currentUser])
 
-    // setFormState(transformed_data);
-  }, [])
-
-  useEffect(() => { // this hook will get called every time fields array
-    // perform some action every time myArr is updated
-    console.log('Updated State', forceRender)
-  }, [forceRender])
 
   //holds the error popup for invalid max and min
   const [rangeErrorPopup, setRangeErrorPopup] = useState();
@@ -81,28 +82,33 @@ export default function Admin_EditQuestionWeights() {
   //updates the category name given the index of the category
   const updateCategoryNames = (event, index) => {
     //updates the category name within the formState state variable
-    let newState = formState;
-    newState.fields[index] = event.target.value;
-    setFormState(newState);
-
-    //force re-render
-    let render = forceRender + 1;
-    setRender(render);
+    const newValue = event.target.value;
+    setFormState((prevState) => {
+      const newFields = [...prevState.fields];
+      newFields[index] = newValue;
+      return {...prevState, fields: newFields};
+    });
   }
 
   //will not allow the user to enter a negative min or a min greater than the max
   const handleMin = (event) => {
-    if(formState.min < 0 || formState.min > formState.max) {
-      setFormState({...formState, min: 1})
-      return
+    const minValue = event.target.value;
+    if(minValue < 0 || minValue > formState.max) {
+      setFormState({...formState, min: 0});
+      return;
     }
     //otherwise, update with user input
-    setFormState({...formState, min: event.target.value})
+    setFormState({...formState, min: minValue});
   }
 
   const handleMax = (event) => {
+    const maxValue = event.target.value;
+    if (maxValue > 100 || maxValue < formState.min) {
+      setFormState({...formState, max: 100});
+      return;
+    }
     //update with user input
-    setFormState({...formState, max: event.target.value})
+    setFormState({...formState, max: maxValue});
   }
 
   //Autoscales the weights array of the department given min and max
@@ -144,32 +150,7 @@ export default function Admin_EditQuestionWeights() {
   }
 
   const postGradingScale = (event) => {
-    //format the weights array
-    var weights = []
-    //include only the weights for the number of fields
-    for(let i = 0 ; i < formState.num_categories; i++) {
-      let categoryWeights = [];
-      //include the weights for each bubble
-      for(let j = 0; j < formState.bubbles; j++) {
-        let val = formState.weights[i][j];
-        categoryWeights.push(val);
-      }
-      weights.push(categoryWeights);
-    }
-
-    //include only the fields selected
-    let categories = []
-    for(let i = 0 ; i < formState.num_categories; i++) {
-      categories.push(formState.fields[i])
-    }
-
-    //format response body
-    let body = {
-      fields: categories,
-      bubbles: formState.bubbles,
-      weights: weights
-    }
-
+    // check errors before we do data transformation
     //if scaled input was messed up show error
     if(checkScalingError()) {
       setScaleErrorPopup(true);
@@ -181,16 +162,40 @@ export default function Admin_EditQuestionWeights() {
       return;
     }
 
-    //make put call
-    updateQuestionWeights(formState.department, body);
+    //format the weights array
+    const weights = []
+    //include only the weights for the number of fields
+    for(let i = 0 ; i < formState.num_categories; i++) {
+      const categoryWeights = [];
+      //include the weights for each bubble
+      for(let j = 0; j < formState.bubbles; j++) {
+        const val = formState.weights[i][j];
+        categoryWeights.push(val);
+      }
+      weights.push(categoryWeights);
+    }
+
+    //include only the fields selected
+    const categories = formState.fields.slice(0, formState.num_categories);
+
+    //format response body
+    const body = { // TODO: ensure this matches DB entry
+      fields: categories,
+      bubbles: formState.bubbles,
+      weights: weights
+    }
+    // console.log(body);
+
+    // TODO: make put call
+    // updateQuestionWeights(adminDepartment, body);
 
     //show success message
     setSucessPopup(true);
   }
 
   //sees if the admin is inputing an invalid value
-  const checkScalingError = (weights) => {
-    var lastVal = 1000000;
+  const checkScalingError = () => {
+    let lastVal = 1000000;
 
     //loop and see if new input is not greater than or equal to last value
     for(let i = 0 ; i < formState.num_categories; i++) {
@@ -317,6 +322,20 @@ export default function Admin_EditQuestionWeights() {
                 <button type="onSubmit" className="set-grading-button">Save Settings to Department</button>
               </div>
             </form>
+            {/* Preview of the question, allowing them to manual override weights */}
+            <Question
+              formData={formState.weights}
+              setFormData={setFormState}
+              questionData={{
+                question: "Preview",
+                subtext: "This is how a question looks like on a survey. The numbers represent the grading scale. You can click the values and edit them if you want to override the autoscaled grading.",
+                type: "preview",
+                mcConfig: {
+                  numBubbles: formState.bubbles,
+                  categories: formState.fields
+                }
+              }}
+            />
             {/* Error message for invalid min-max */}
             <Popup
               open={rangeErrorPopup}
@@ -392,25 +411,6 @@ export default function Admin_EditQuestionWeights() {
                 </button>
               </div>
             </Popup>
-
-            <div className="preview">
-              {/* Shows the preview of what a question looks like */}
-              <div className="content">
-                <Question
-                  formData={formState.weights}
-                  setFormData={setFormState}
-                  questionData={{
-                    question: "Preview",
-                    subtext: "This is how a question looks like on a survey. The numbers represent the grading scale. You can click the values and edit them if you want to override the autoscaled grading.",
-                    type: "preview",
-                    mcConfig: {
-                      numBubbles: formState.bubbles,
-                      categories: formState.fields
-                    }
-                  }}
-                />
-              </div>
-            </div>
           </div>
         </div>
       </div>
