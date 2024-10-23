@@ -10,7 +10,7 @@ import { View } from "@aws-amplify/ui-react";
 
 export default function Admin_EditQuestionWeights() {
   // TODO get current user and department
-  // const currentUser = useSelector((state => state.auth.user));
+   const currentUser = useSelector((state => state.auth.user));
   const [adminDepartment, setAdminDepartment] = useState(null);
 
   //handles changes that user makes to form
@@ -30,19 +30,23 @@ export default function Admin_EditQuestionWeights() {
   
 
   // TODO pull previous multiple choice config
-  // useEffect(() => {
-  //   //get the actual department of the current user
-  //   if(currentUser) {
-  //     const adminDept = currentUser.roles.find(role => role.user_type == 'admin' && role.resource_type == 'dept' && role.status == true)?.resource_id;
-  //     setAdminDepartment(adminDept);
-  //     getQuestionWeights(adminDept)
-  //       .then((weights) => {
-  //         // TODO data transformation
-  //         // const transformed_data = {...formState}; // would prefer a deep-copy
-  //         // setFormState(transformed_data);
-  //       });
-  //   }
-  // }, [currentUser])
+  useEffect(() => {
+    //get the actual department of the current user
+    if(currentUser) {
+      const adminDept = currentUser.roles.find(role => role.user_type == 'admin' && role.resource_type == 'dept' && role.status == true)?.resource_id;
+      console.log("admindept: " + adminDept );
+      setAdminDepartment(adminDept);
+      getQuestionWeights(adminDept)
+        .then((weights) => {
+          //TODO data transformation
+          console.log(weights);
+          const transformed_data = {...formState,weights}; // would prefer a deep-copy
+          
+          setFormState(transformed_data);
+          console.log(transformed_data);
+       });
+    }
+  }, [currentUser])
 
 
   //holds the error popup for invalid max and min
@@ -189,7 +193,8 @@ export default function Admin_EditQuestionWeights() {
 
     // TODO: make put call
     // updateQuestionWeights(adminDepartment, body);
-
+    console.log(JSON.stringify(body));
+    console.log(adminDepartment);
     //show success message
     setSucessPopup(true);
   }

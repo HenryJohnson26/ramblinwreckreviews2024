@@ -91,15 +91,19 @@ export async function deleteQuestion(questionId) {
  */
 
 export async function updateQuestionWeights(department, weights) {
-  // const response = await axiosInstance.put(`/departments/${department.id}/mcqweights`, weights);
+   //const response = await axiosInstance.put(`/departments/${department.id}/mcqweights`, weights);
   // return response.body;
   return weights;
 }
 
-export async function getQuestionWeights(department) {
-  // const response = await axiosInstance.get(`/department/${department.id}/mcqweights`, weights);
-  // return response.body;
-  return true;
+export async function getQuestionWeights(departmentId) {
+   //const response = await axiosInstance.get(`/department/${department.id}/mcq-weights`, weights);
+   console.log("kfjgfjgkfj");
+   const response = await axiosInstance.get(`/departments/${departmentId}/mcq-weights`);
+   
+   console.log("fdfdfdfdf" + response.data.body);
+   return JSON.parse(response.data.body);
+  //return true;
 }
 
 /**
