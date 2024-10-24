@@ -38,14 +38,23 @@ export default function Admin_EditQuestionWeights() {
       setAdminDepartment(adminDept);
       getQuestionWeights(adminDept)
         .then((weights) => {
-          //TODO data transformation
-          console.log(weights);
-          const transformed_data = {...formState,weights}; // would prefer a deep-copy
-          
-          setFormState(transformed_data);
-          console.log(transformed_data);
-       });
-    }
+          // data transformation
+          console.log(weights)
+        const transformed_data = {...formState};
+        transformed_data.num_categories = weights.fields.length;
+        for (let i = 0; i < transformed_data.num_categories; i++) {
+          transformed_data.fields[i] = weights.fields[i];
+        }
+        transformed_data.bubbles = weights.bubbles;
+        for (let i = 0; i < transformed_data.num_categories; i++) {
+          for (let j = 0; j < weights.bubbles; j++) {
+            transformed_data.weights[i][j] = weights.weights[i][j];
+          }
+        }
+
+        setFormState(transformed_data);
+              });
+            }
   }, [currentUser])
 
 
@@ -191,8 +200,11 @@ export default function Admin_EditQuestionWeights() {
     }
     // console.log(body);
 
-    // TODO: make put call
-    // updateQuestionWeights(adminDepartment, body);
+    //TODO: make put call
+    updateQuestionWeights(adminDepartment, body)
+     .then((weights2) => {
+       console.log(JSON.stringify(weights2));
+          });
     console.log(JSON.stringify(body));
     console.log(adminDepartment);
     //show success message
