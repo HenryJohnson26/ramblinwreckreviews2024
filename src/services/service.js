@@ -92,23 +92,12 @@ export async function deleteQuestion(questionId) {
 
 
 
-export async function updateQuestionWeights(departmentId, jsonWeights) {
-  //console.log("fields "+JSON.stringify(jsonWeights.fields,null,2));
-  //console.log("bubbles "+jsonWeights.bubbles);
-  //console.log("weights "+JSON.stringify(jsonWeights.weights,null,2));
-  
-  const response = await axiosInstance.post(`/departments/${departmentId}/mcq-weights`,
-    {
-      deptId: departmentId,
-      fields: jsonWeights.fields, 
-      bubbles: jsonWeights.bubbles, 
-      weights: jsonWeights.weights
-    }
-  );
-
-  //console.log("response  "+ JSON.stringify(response,null,2));
-
-  return JSON.parse(response.data.body);
+export async function updateQuestionWeights(departmentId, weights) {
+  const response = await axiosInstance.post(`/departments/${departmentId}/mcq-weights`, weights);
+  if(response.data.statusCode != 200) {
+    throw new Error(response.data.statusCode);
+  }
+  return JSON.parse(JSON.parse(response.data.body).json_question_weights);
 }
 
 export async function getQuestionWeights(departmentId) {

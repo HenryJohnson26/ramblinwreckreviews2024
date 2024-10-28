@@ -29,7 +29,6 @@ export default function Admin_EditQuestionWeights() {
 
   
 
-  // TODO pull previous multiple choice config
   useEffect(() => {
     //get the actual department of the current user
     if(currentUser) {
@@ -39,23 +38,27 @@ export default function Admin_EditQuestionWeights() {
       getQuestionWeights(adminDept)
         .then((weights) => {
           // data transformation
-          console.log(weights)
-        const transformed_data = {...formState};
-        transformed_data.num_categories = weights.fields.length;
-        for (let i = 0; i < transformed_data.num_categories; i++) {
-          transformed_data.fields[i] = weights.fields[i];
-        }
-        transformed_data.bubbles = weights.bubbles;
-        for (let i = 0; i < transformed_data.num_categories; i++) {
-          for (let j = 0; j < weights.bubbles; j++) {
-            transformed_data.weights[i][j] = weights.weights[i][j];
-          }
-        }
-
-        setFormState(transformed_data);
-              });
-            }
+          updateFormState(weights);
+        });
+    }
   }, [currentUser])
+
+  const updateFormState = (newState) => {
+    console.log(newState)
+    const transformed_data = {...formState};
+    transformed_data.num_categories = newState.fields.length;
+    for (let i = 0; i < transformed_data.num_categories; i++) {
+      transformed_data.fields[i] = newState.fields[i];
+    }
+    transformed_data.bubbles = newState.bubbles;
+    for (let i = 0; i < transformed_data.num_categories; i++) {
+      for (let j = 0; j < newState.bubbles; j++) {
+        transformed_data.weights[i][j] = newState.weights[i][j];
+      }
+    }
+
+    setFormState(transformed_data);
+  }
 
 
   //holds the error popup for invalid max and min
@@ -69,6 +72,7 @@ export default function Admin_EditQuestionWeights() {
 
   //holds the error popup if the categories are not properly filled out
   const [categoryErrorPopup, setCategoryErrorPopup] = useState(false);
+  const [updateErrorPopup, setUpdateErrorPopup] = useState(false);
 
   //Event that is fired when the button to submit the question is clicked
   const handleFormSubmit = (event) => {
@@ -202,13 +206,15 @@ export default function Admin_EditQuestionWeights() {
 
     //TODO: make put call
     updateQuestionWeights(adminDepartment, body)
-     .then((weights2) => {
-       console.log(JSON.stringify(weights2));
-          });
-    console.log(JSON.stringify(body));
-    console.log(adminDepartment);
-    //show success message
-    setSucessPopup(true);
+      .then((weights2) => {
+          updateFormState(weights2);
+          console.log(JSON.stringify(weights2));
+          setSucessPopup(true);
+        })
+      .catch ((err => {
+        console.log(err)
+        setUpdateErrorPopup(true);
+      }))
   }
 
   //sees if the admin is inputing an invalid value
@@ -420,6 +426,25 @@ export default function Admin_EditQuestionWeights() {
               </p>
               <button
                 onClick={() => setCategoryErrorPopup(false)}
+                className="popup-button"
+              >
+                Close
+              </button>
+            </div>
+          </Popup>
+
+          {/* Error message for update error*/}
+          <Popup
+            open={updateErrorPopup}
+            onClose={() => setUpdateErrorPopup(false)}
+            position="right center"
+          >
+            <div className="content-box-error">
+              <p className="content-text">
+                Something went wrong when updating the multiple choice question weights.
+              </p>
+              <button
+                onClick={() => setUpdateErrorPopup(false)}
                 className="popup-button"
               >
                 Close
