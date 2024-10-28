@@ -4,7 +4,14 @@ import csciBkgdImg from '../assets/images/csci-bkgd-img.jpeg';
 import ellipsis from '../assets/images/ellipsis.png';
 import '../css/SurveyCard.css';
 
-export default function SurveyCard() {
+export default function SurveyCard({surveyConfig = {
+    title:"Peer Evaluation 1",
+    course:"CSCI 370",
+    status:"Unavailable",
+    start_date:"May 28, 2024",
+    end_date:"May 30, 2024",
+    progress:"64%" }
+}) {
       return (
           <>
             <div className='responsive'>
@@ -13,11 +20,11 @@ export default function SurveyCard() {
                         <img className='professor-home-survey-card-container-bkgd-image' src={csciBkgdImg}></img>
                         <div className='professor-home-survey-card-header-container'>
                             <div className='professor-home-survey-card-header-container-title-container'>
-                                <h3>Peer Evaluation 1</h3>
-                                <h4>CSCI 370</h4>
+                                <h3>{surveyConfig.title}</h3>
+                                <h4>{surveyConfig.course}</h4>
                             </div>
                             <div className='professor-home-survey-card-status-container'>
-                                <p>Unavailable</p>
+                                <p>{surveyConfig.status}</p>
                             </div>
                             <div>
                             <div className='professor-home-survey-card-dropdown-sub-container'>
@@ -31,10 +38,10 @@ export default function SurveyCard() {
                             </div>
                         </div>
                         <div className='professor-home-survey-card-footer-container'>
-                        <h4>May 28, 2024 - May 30, 2024</h4>
+                        <h4>{surveyConfig.start_date} - {surveyConfig.end_date}</h4>
                         <div className='professor-home-survey-card-progress-indicator-container'>
                             <div className="professor-home-survey-card-progress-indicator-bar" id='professor-home-survey-card-progress-indicator-bar-id'>
-                                <div className="professor-home-survey-card-progress-indicator-bar-inside" id='professor-home-survey-card-progress-indicator-bar-inside-id'><p>64%</p></div>
+                                <div className="professor-home-survey-card-progress-indicator-bar-inside" id='professor-home-survey-card-progress-indicator-bar-inside-id'><p>{surveyConfig.progress}</p></div>
                             </div>
                         </div>
                         </div>
