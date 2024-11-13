@@ -3,7 +3,7 @@ import ListManager from "../../ListManager/ListManager";
 import { getQuestions, createQuestion, updateQuestion, deleteQuestion } from "../../../services/service";
 import QuestionListConfig from '../../ListManager/QuestionListConfig';
 import MenuBar from "../../MenuBar";
-import { Accordion, View } from "@aws-amplify/ui-react";
+import { Accordion, View, Button } from "@aws-amplify/ui-react";
 import PopupForm from "../../AddForms/PopupForm";
 import { useSelector } from "react-redux";
 
@@ -14,11 +14,9 @@ export default function Admin_ManageQuestions() {
   // stores questions by category
   const [questionsByCategory, setQuestionsByCategory] = useState({});
 
-  // so we don't need multiple add forms
-  const [addingToCategory, setAddingToCategory] = useState("");
-
   // pop-up form states
   const popupRef = useRef(null);
+  const categoryRef = useRef(null);
   const [formData, setFormData] = useState({});
 
   const editQuestion = async (question) => {
@@ -60,15 +58,21 @@ export default function Admin_ManageQuestions() {
     }
   }, [currentUser])
 
-  const onSubmit = async () => {
+  const onSubmit = async (addingToCategory = undefined) => {
     // convert to question table fields
     console.log(formData);
-    const newQuestion = await createQuestion(adminDepartment, formData);
+    // if we have a category to add to, it's not in formData, so add it
+    const sendQuestion = {...formData};
+    if (!addingToCategory) { 
+      sendQuestion.category = addingToCategory;
+    }
+    const newQuestion = await createQuestion(adminDepartment, sendQuestion);
+    console.log(newQuestion);
 
     // add to table
     setQuestionsByCategory(pq => {
       const newQuestions = {...pq};
-      newQuestions[addingToCategory] = [...newQuestions[addingToCategory], newQuestion];
+      newQuestions[newQuestion.category] = [...(!!newQuestions[newQuestion.category] ? newQuestions[newQuestion.category] : []), newQuestion];
       return newQuestions;
     });
 
@@ -83,7 +87,7 @@ const onOpen = (category) => {
   return (
     <View style={{display: 'flex', flexDirection: 'row', height: '100%', width: '100%'}}>
       <MenuBar/>
-      <View style={{width: '100%', overflow: 'scroll', marginLeft: 10}}>
+      <View style={{width: '100%', overflow: 'scroll', marginLeft: 10, marginRight: 10}}>
         <Accordion.Container allowMultiple>
           {Object.keys(questionsByCategory).sort().map(category => (
             <Accordion.Item key={category} value={category} style={{marginTop: 10}}>
@@ -102,6 +106,19 @@ const onOpen = (category) => {
             </Accordion.Item>
           ))}
         </Accordion.Container>
+        
+        <Button onClick={() => categoryRef.current.onOpen()} 
+          style={{minWidth: "fit-content", marginLeft: "auto", marginRight: "auto", display: "flex", marginTop: 10}}>
+          Add Category
+        </Button>
+
+        <PopupForm
+          formData={formData}
+          onChange={setFormData}
+          onSubmit={onSubmit}
+          formType="category"
+          ref={categoryRef}
+        />
         
         <PopupForm
           formData={formData}
