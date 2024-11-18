@@ -12,8 +12,26 @@ test("renders MenuBar component", () => {
   const chevronButton = screen.getByAltText("dropdown button");
   expect(chevronButton).toBeInTheDocument();
 
-  const menu = screen.queryByRole("menu");
-  expect(menu).toBeNull();
+  //should not render initially
+
+  if (localStorage.getItem("AWS_signedInUserCurrentGroupStatus") === "ADMIN") {
+    const menu = screen.getByRole("adminMenu");
+    expect(menu).toBeNull();
+  }
+
+  if (
+    localStorage.getItem("AWS_signedInUserCurrentGroupStatus") === "PROFESSOR"
+  ) {
+    const menu = screen.getByRole("professorMenu");
+    expect(menu).toBeNull();
+  }
+
+  if (
+    localStorage.getItem("AWS_signedInUserCurrentGroupStatus") === "STUDENT"
+  ) {
+    const menu = screen.getByRole("studentMenu");
+    expect(menu).toBeNull();
+  }
 });
 
 test("renders chevron for MenuBar component", () => {
@@ -53,5 +71,36 @@ test("renders correct menu for MenuBar component based on user role", () => {
   ) {
     expect(screen.getByText(/Take Survey/)).toBeInTheDocument();
     expect(screen.getByText(/View Feedback/)).toBeInTheDocument();
+  }
+});
+
+test("toggles menu visibility when chevron is clicked", () => {
+  render(
+    <MemoryRouter>
+      <MenuBar />
+    </MemoryRouter>
+  );
+
+  const chevronButton = screen.getByAltText("dropdown button");
+  expect(chevronButton).toBeInTheDocument();
+  fireEvent.click(chevronButton);
+
+  if (localStorage.getItem("AWS_signedInUserCurrentGroupStatus") === "ADMIN") {
+    const menu = screen.getByRole("adminMenu");
+    expect(menu).toBeInTheDocument();
+  }
+
+  if (
+    localStorage.getItem("AWS_signedInUserCurrentGroupStatus") === "PROFESSOR"
+  ) {
+    const menu = screen.getByRole("professorMenu");
+    expect(menu).toBeInTheDocument();
+  }
+
+  if (
+    localStorage.getItem("AWS_signedInUserCurrentGroupStatus") === "STUDENT"
+  ) {
+    const menu = screen.getByRole("studentMenu");
+    expect(menu).toBeInTheDocument();
   }
 });
