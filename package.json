@@ -9,7 +9,7 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "react-scripts test",
-    "test-all": "npm test -- MenuBar.test.js NavCard.test.js Question.test.js"
+    "test-all": "npm test -- MenuBar.test.js NavCard.test.js Question.test.js DropZone.test.js Student_Home.test.js"
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.3.4",

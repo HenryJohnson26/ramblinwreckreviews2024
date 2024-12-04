@@ -24,12 +24,13 @@ test("renders NavCard component with correct props", () => {
       />
     </MemoryRouter>
   );
-
   const button = screen.getByRole("button");
   expect(button).toBeInTheDocument();
   expect(screen.getByText("Test")).toBeInTheDocument();
   expect(screen.getByText("Test Description")).toBeInTheDocument();
 });
+
+
 
 //does not work because it doesn't update like an actual browser. not sure if there is a fix
 // test("clicking NavCard component navigates to correct route", () => {
